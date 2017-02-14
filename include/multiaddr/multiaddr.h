@@ -1,128 +1,56 @@
 #ifndef MULTIADDR
 #define MULTIADDR
+#include <string.h>
+
 #include "varhexutils.h"
-//#include "codecs.h"
 #include "varint.h"
 #include "protocols.h"
 #include "protoutils.h"
-#include <string.h>
-int strpos(char *haystack, char *needle)
+
+/**
+ * Normally, addresses have been represented using string addresses, like:
+
+	tcp4://127.0.0.1:1234
+	udp4://10.20.30.40:5060
+	ws://1.2.3.4:5678
+	tcp6://[1fff:0:a88:85a3::ac1f]:8001
+	This isn't optimal. Instead, addresses should be formatted so:
+
+	Binary format:
+
+	(varint proto><n byte addr>)+
+	<1 byte ipv4 code><4 byte ipv4 addr><1 byte udp code><2 byte udp port>
+	<1 byte ipv6 code><16 byte ipv6 addr><1 byte tcp code><2 byte tcp port>
+
+	String format:
+
+	(/<addr str code>/<addr str rep>)+
+	/ip4/<ipv4 str addr>/udp/<udp int port>
+	/ip6/<ipv6 str addr>/tcp/<tcp int port>
+ */
+
+struct MultiAddress
 {
-	char *p = strstr(haystack, needle);
-	if (p)
-	{
-		return p - haystack;
-	}
-	else
-	{
-		return -1;   // Not found = -1.
-	}
-}
-struct maddr
-{
-	char string[800];
-	uint8_t bytes[400];
-	int bsize[1];
+	// A MultiAddress represented as a string
+	char* string;
+	// A MultiAddress represented as an array of bytes
+	uint8_t* bytes;
+	size_t bsize;
 };
-struct maddr new_maddr_fb(uint8_t * byteaddress,int size)//Construct new address from bytes
-{
-	struct maddr anewaddr2;
-	if(byteaddress!=NULL)
-	{
-		memcpy(anewaddr2.bytes, byteaddress,size);
-		if(bytes_to_string(anewaddr2.string,byteaddress,size)==1)
-		{
-			return anewaddr2;
-		}
-	}
-	return anewaddr2;
-}
-struct maddr new_maddr_fs(char * straddress)//Construct new address from string
-{
-	struct maddr anewaddr;
-	bzero(anewaddr.string, 800);
-	strcpy(anewaddr.string, straddress);
-	anewaddr.bsize[0] = 0;
-	if(string_to_bytes(anewaddr.bytes,anewaddr.bsize,anewaddr.string,sizeof(anewaddr.string))==1)
-	{
-		int betta;
-		//printf("BSIZE: %u\n", anewaddr.bsize[0]);
-		for(betta=anewaddr.bsize[0];betta<400;betta++)
-		{
-			anewaddr.bytes[betta] = '\0';
-		}
-		return anewaddr;
-	}
-	return anewaddr;
-}
-int m_encapsulate(struct maddr * result, char * string)
-{
-	if(result!=NULL&&string!=NULL)
-	{
-		int success = 0;
-		char pstr[800];
-		bzero(pstr,800);
-		strcpy(pstr,result->string);
-		strcat(pstr,string+1);
-		if(string_to_bytes(result->bytes,result->bsize,pstr,sizeof(pstr)))
-		{
-			strcpy(result->string,pstr);
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		return 0;
-	}
-}
-int m_decapsulate(struct maddr * result, char * srci)
-{
-	if(result!=NULL && srci!=NULL)
-	{
-		char * procstr = NULL;
-		procstr = result->string;
-		int i=0;
-		int sz=strlen(procstr);
-		char * src = NULL;
-		src=srci;
-		for(i=0;i<sz;i++)
-		{
-			if(procstr[i] == '/')
-			{
-				procstr[i]=' ';
-			}
-		}
-		int pos=-1;
-		pos=strpos(procstr,src);
-		if(pos!=-1)
-		{
-			for(i=pos;i<sz;i++)
-			{
-				procstr[i] = '\0';
-			}
-			for(i=0;i<sz;i++)
-			{
-				if(procstr[i] == ' ')
-				{
-					procstr[i] = '/';
-				}
-			}
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-		return 0;
-	}
-	else
-	{
-		return 0;
-	}
-}
+
+
+int strpos(char *haystack, char *needle);
+
+struct MultiAddress* multiaddress_new_from_bytes(const uint8_t* byteaddress, int size); //Construct new address from bytes
+
+struct MultiAddress* multiaddress_new_from_string(const char* straddress); //Construct new address from string
+
+void multiaddress_free(struct MultiAddress* in);
+
+int multiaddress_copy(const struct MultiAddress* source, struct MultiAddress* destination);
+
+int multiaddress_encapsulate(struct MultiAddress * result, char * string);
+
+int multiaddress_decapsulate(struct MultiAddress * result, char * srci);
 
 #endif

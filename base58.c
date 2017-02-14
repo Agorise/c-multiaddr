@@ -31,7 +31,7 @@ static const int8_t b58digits_map[] = {
  * @param binszp the size of the results buffer
  * @returns true(1) on success
  */
-int libp2p_crypto_encoding_base58_decode(const char* b58, size_t base58_size, unsigned char** bin, size_t* binszp)
+int multiaddr_encoding_base58_decode(const char* b58, size_t base58_size, unsigned char** bin, size_t* binszp)
 {
 	size_t binsz = *binszp;
 	const unsigned char* b58u = (const void*)b58;
@@ -125,7 +125,7 @@ int libp2p_crypto_encoding_base58_decode(const char* b58, size_t base58_size, un
  * @returns true(1) on success
  */
 //int libp2p_crypto_encoding_base58_encode(const unsigned char* binary_data, size_t binary_data_size, unsigned char* base58, size_t* base58_size)
-int libp2p_crypto_encoding_base58_encode(const unsigned char* data, size_t binsz, unsigned char** b58, size_t* b58sz)
+int multiaddr_encoding_base58_encode(const unsigned char* data, size_t binsz, unsigned char** b58, size_t* b58sz)
 {
 	const uint8_t* bin = data;
 	int carry;
@@ -175,7 +175,7 @@ int libp2p_crypto_encoding_base58_encode(const unsigned char* data, size_t binsz
  * @param base58_string the string
  * @returns the size in bytes had the string been decoded
  */
-size_t libp2p_crypto_encoding_base58_decode_size(const unsigned char* base58_string) {
+size_t multiaddr_encoding_base58_decode_size(const unsigned char* base58_string) {
 	size_t string_length = strlen((char*)base58_string);
 	size_t decoded_length = 0;
 	size_t radix = strlen(b58digits_ordered);
@@ -190,7 +190,7 @@ size_t libp2p_crypto_encoding_base58_decode_size(const unsigned char* base58_str
  * @param base58_string the string
  * @returns the maximum size in bytes had the string been decoded
  */
-size_t libp2p_crypto_encoding_base58_decode_max_size(const unsigned char* base58_string) {
+size_t multiaddr_encoding_base58_decode_max_size(const unsigned char* base58_string) {
 	size_t string_length = strlen((char*)base58_string);
 	size_t decoded_length = 0;
 	size_t radix = strlen(b58digits_ordered);
