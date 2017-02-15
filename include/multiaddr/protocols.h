@@ -8,28 +8,33 @@
 #include <errno.h>
 #include "varhexutils.h"
 
-struct protocol
+struct Protocol
 {
-	char hexcode[21];
+	//char hexcode[21];
 	int deccode;
 	int size;
 	char name[30];
 };
 
-struct protocol *protocol_P; //Pointer for holding multiple structures
+struct ProtocolListItem {
+	struct Protocol* current;
+	struct ProtocolListItem* next;
+};
 
-int protocol_REMOVE_id(int remid); //Function to remove & shift back all data, sort of like c++ vectors.
+int protocol_REMOVE_id(struct ProtocolListItem* head, int remid); //Function to remove & shift back all data, sort of like c++ vectors.
 
-void unload_protocols();
+void unload_protocols(struct ProtocolListItem* head);
 
-void load_protocols();
+/**
+ * load the available protocols into the global protocol_P
+ * @returns True(1) on success, otherwise 0
+ */
+int load_protocols(struct ProtocolListItem** head);
 
-struct protocol * proto_with_name(char proto_w_name[]); //Search for protocol with inputted name
+struct Protocol * proto_with_name(const struct ProtocolListItem* head, const char* proto_w_name); //Search for protocol with inputted name
 
-struct protocol * proto_with_deccode(int proto_w_deccode); //Search for protocol with inputted deccode
+struct Protocol * proto_with_deccode(const struct ProtocolListItem* head, int proto_w_deccode); //Search for protocol with inputted deccode
 
-void pp(); //Purely for debugging purposes, prints the entire loaded protocols.
-
-void protocols_with_string(char * meee,int sizi); // NOT FINISHED, DO NOT USE!
+void protocols_with_string(const struct ProtocolListItem* head, char * meee, int sizi); // NOT FINISHED, DO NOT USE!
 
 #endif

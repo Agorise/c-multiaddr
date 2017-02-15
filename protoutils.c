@@ -291,13 +291,16 @@ char * int2ip(int inputintip)
 	return xxx_int2ip_result;
 }
 //I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
+int bytes_to_string(char** buffer, const uint8_t* catx, int xbsize)
 {
-	bzero(resultzx,800);
+	*buffer = malloc(800);
+	char* resultzx = *buffer;
+	bzero(resultzx, 800);
 	uint8_t * bytes = NULL;
 	int size = 0;
 	size = xbsize;
-	load_protocols();
+	struct ProtocolListItem* head = NULL;
+	load_protocols(&head);
 	char hex[xbsize*2];
 	bzero(hex,xbsize*2);
 	strcat(hex,Var_To_Hex(size, catx));
@@ -309,21 +312,17 @@ int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
 	//Stage 1 ID:
 	if(lastpos!=0)
 	{
-		lastpos+1;
+		lastpos++;
 	}
 	pid[0] = hex[lastpos];
 	pid[1] = hex[lastpos+1];
 	pid[2] = '\0';
-	if(lastpos == 0)
-	{
-		load_protocols();
-	}
-	if(proto_with_deccode(Hex_To_Int(pid)))
+	if(proto_with_deccode(head, Hex_To_Int(pid)))
 	{
 //////////Stage 2: Address
-		struct protocol * PID;
+		struct Protocol * PID;
 		PID = NULL;
-		PID = proto_with_deccode(Hex_To_Int(pid));
+		PID = proto_with_deccode(head, Hex_To_Int(pid));
 		if(strcmp(PID->name,"ipfs")!=0)
 		{
 			lastpos = lastpos+2;
@@ -403,9 +402,8 @@ int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
 				//printf("\nIPFS_ADDR[%d] = %c\n\n",IPFS_PARSE,hex[i]);
 				IPFS_PARSE++;
 			}
-			unsigned char addrbuf[strlen(IPFS_ADDR)/2];
-			bzero(addrbuf,strlen(IPFS_ADDR)/2);
-			memcpy(addrbuf,Hex_To_Var(IPFS_ADDR),sizeof(addrbuf));
+			size_t num_bytes = 0;
+			unsigned char* addrbuf = Hex_To_Var(IPFS_ADDR, &num_bytes);
 			size_t rezbuflen = strlen(IPFS_ADDR);
 			unsigned char rezultat[rezbuflen];
 			bzero(rezultat,rezbuflen);
@@ -413,9 +411,11 @@ int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
 			pointyaddr = rezultat;
 			int returnstatus = 0;
 			returnstatus = multiaddr_encoding_base58_encode(addrbuf, sizeof(addrbuf), &pointyaddr, &rezbuflen);
+			free(addrbuf);
 			if(returnstatus == 0)
 			{
 				printf("\nERROR!!!!!\n");
+				unload_protocols(head);
 				return 0;
 			}
 			strcat(resultzx, "/");
@@ -425,12 +425,13 @@ int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
 		}
 	}
 	strcat(resultzx, "/");
-	unload_protocols();
+	unload_protocols(head);
+	return 1;
 
 }
 //
 
-char * address_string_to_bytes(struct protocol * xx, const char * abc,size_t getsznow)
+char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t getsznow)
 {
 	static char astb__stringy[800] = "\0";
 	bzero(astb__stringy,800);
@@ -644,48 +645,43 @@ char * address_string_to_bytes(struct protocol * xx, const char * abc,size_t get
  * @param strx the incoming string
  * @param strsize the string length
  */
-int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_t strsize)
+int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, size_t strsize)
 {
 	if(strx[0] != '/')
 	{
 		printf("Error, must start with '/'\n");
 		return 0;
 	}
-	//Getting total words
-	int totalwords = 0;
-	char* totp;
-	char totalwordstest[strsize + 1];
-	bzero(totalwordstest,strsize + 1);
-	strcat(totalwordstest, strx);
-	totp = strtok(totalwordstest, "/");
-	while(totp != NULL)
-	{
-		totp = strtok (NULL, "/");
-		totalwords++;
-	}
+
 	//Initializing variables to store our processed HEX in:
 	int malf=0; //In case something goes wrong this will be 1.
 	char processed[800];//HEX CONTAINER
 	bzero(processed,800);
+
 	//Now Setting up variables for calculating which is the first
 	//and second word:
 	int firstorsecond = 1; //1=Protocol && 2 = Address
-	char pstring[strsize + 1];//We do not want to harm the initial string.
-	bzero(pstring,strsize + 1);
-	strcat(pstring,strx);
+
+	// copy input so as to not harm it
+	char pstring[strsize + 1];
+	strcpy(pstring,strx);
+
+	// load up the list of protocols
+	struct ProtocolListItem* head = NULL;
+	load_protocols(&head);
+
 	//Starting to extract words and process them:
 	char * wp;
 	char * end;
 	wp=strtok_r(pstring,"/",&end);
-	load_protocols();
-	struct protocol * protx;
+	struct Protocol * protx;
 	while(wp)
 	{
 		if(firstorsecond==1)//This is the Protocol
 		{
-			if(proto_with_name(wp))
+			if(proto_with_name(head, wp))
 			{
-				protx=proto_with_name(wp);
+				protx=proto_with_name(head, wp);
 				//printf("PROTOCOL: %s\n",protx->name);
 				strcat(processed, Int_To_Hex(protx->deccode));
 				firstorsecond=2;//Since the next word will be an address
@@ -716,8 +712,7 @@ int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_
 		wp=strtok_r(NULL,"/",&end);
 	}
 	protx=NULL;
-	unload_protocols();
-	//printf("Processed contains: %s \n",processed);
+	unload_protocols(head);
 
 	if(malf==1)
 	{
@@ -725,17 +720,7 @@ int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_
 	}
 	else
 	{
-		bzero(finalbytes,400);
-		//printf("XXX: %s\n",xxx);
-		memcpy(finalbytes, Hex_To_Var(processed), 400);
-		realbbsize[0] = 0;
-		for(int i=0;i<400;i++)
-		{
-			if(finalbytes[i])
-			{
-				realbbsize[0]++;
-			}
-		}
+		*finalbytes = Hex_To_Var(processed, realbbsize);
 		return 1;
 	}
 }

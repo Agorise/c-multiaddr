@@ -33,7 +33,13 @@ void vthconvert(int size, char * crrz01, uint8_t * xbuf);
 
 char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT); //VAR[binformat] TO HEX
 
-uint8_t * Hex_To_Var(char * Hexstr); //HEX TO VAR[BINFORMAT]
+/**
+ * Turn a hex string into a byte array
+ * @param incoming a string of hex values
+ * @param num_bytes the size of the result
+ * @returns a pointer to the converted value
+ */
+unsigned char* Hex_To_Var(char * Hexstr, size_t* num_bytes);
 
 //
 void convert(char * convert_result, uint8_t * buf);					//Both of them read them properly.

@@ -116,32 +116,35 @@ char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT) //VAR[binformat] TO 
 		return convert_resultz1;
 	}
 }
-uint8_t * Hex_To_Var(char * Hexstr) //HEX TO VAR[BINFORMAT]
+
+/**
+ * Turn a hex string into a byte array
+ * @param incoming a string of hex values
+ * @param num_bytes the size of the result
+ * @returns a pointer to the converted value
+ */
+unsigned char* Hex_To_Var(const char* incoming, size_t* num_bytes) //HEX TO VAR[BINFORMAT]
 {
-	static uint8_t buffy_HEX[400] = {0};
-	bzero(buffy_HEX,400);
-	int i;
-	char codo[800] = "\0";
-	bzero(codo,800);
-	strcpy(codo, Hexstr);
+	// the return value
+	unsigned char* retVal = NULL;
+	int incoming_size = strlen(incoming);
+	*num_bytes = incoming_size / 2;
+	retVal = (unsigned char*)malloc(*num_bytes);
+
 	char code[3];
-	bzero(code,3);
 	code[3]='\0';
-	int x = 0;
-	int fori001=0;
-	for(fori001=0;fori001<800;fori001++)
+	int i=0;
+	for(i=0; i < incoming_size; i += 2)
 	{
-		strncpy(&code[0],&codo[fori001],1);
-		strncpy(&code[1],&codo[fori001+1],1);
+		code[0] = incoming[i];
+		code[1] = incoming[i+1];
     	char *ck = NULL;
     	uint64_t lu = 0;
     	lu=strtoul(code, &ck, 16);
-		buffy_HEX[x] = lu;
-		//printf("%s - %lu\n",code,lu);
-		fori001++;
-		x++;
+		retVal[i] = lu;
+		i++;
 	}
-	return buffy_HEX;
+	return retVal;
 }
 //
 void convert(char * convert_result, uint8_t * buf)					//Both of them read them properly.

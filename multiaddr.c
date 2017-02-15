@@ -50,7 +50,7 @@ struct MultiAddress* multiaddress_new_from_bytes(const uint8_t* byteaddress, int
 				return NULL;
 			}
 			memcpy(out->bytes, byteaddress, size);
-			if(!bytes_to_string(out->string,byteaddress,size)==1)
+			if(!bytes_to_string(&out->string,byteaddress,size)==1)
 			{
 				multiaddress_free(out);
 				return NULL;
@@ -64,14 +64,14 @@ struct MultiAddress* multiaddress_new_from_string(const char* straddress)//Const
 {
 	struct MultiAddress* out = multiaddress_new();
 	if (out != NULL) {
-		out->string = malloc(sizeof(straddress) + 1);
+		out->string = malloc(strlen(straddress) + 1);
 		if (out->string == NULL) {
 			multiaddress_free(out);
 			return NULL;
 		}
 		strcpy(out->string, straddress);
 
-		if (string_to_bytes(out->bytes, &out->bsize, out->string, sizeof(out->string)) == 0 )
+		if (string_to_bytes(&out->bytes, &out->bsize, out->string, strlen(out->string)) == 0 )
 		{
 			multiaddress_free(out);
 			return NULL;
@@ -138,7 +138,7 @@ int multiaddress_encapsulate(struct MultiAddress* result, char* string)
 			return 0;
 		}
 		strcpy(result->string, string);
-		if(string_to_bytes(result->bytes, &result->bsize, result->string, sizeof(result->string)) == 0)
+		if(string_to_bytes(&result->bytes, &result->bsize, result->string, sizeof(result->string)) == 0)
 		{
 			multiaddress_free(result);
 			return 0;
