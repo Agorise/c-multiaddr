@@ -98,23 +98,33 @@ void multiaddress_free(struct MultiAddress* in) {
  * @param out the destination. NOTE: memory for out should be preallocated
  * @returns true(1) on success, otherwise false(0)
  */
-int multiaddress_copy(const struct MultiAddress* in, struct MultiAddress* out) {
-	if (in != NULL && out != NULL) {
-		// memory allocation
-		out->bytes = malloc(in->bsize);
-		if (out->bytes != NULL) {
-			out->string = malloc(strlen(in->string) + 1);
-			if (out->string != NULL) {
-				// copy
+struct MultiAddress* multiaddress_copy(const struct MultiAddress* in) {
+	struct MultiAddress* out = NULL;
+	if (in != NULL) {
+		out = (struct MultiAddress*)malloc(sizeof(struct MultiAddress));
+		if (out != NULL) {
+			if (in->bsize > 0) {
+				out->bytes = malloc(in->bsize);
+				if (out->bytes == NULL) {
+					free(out);
+					return NULL;
+				}
 				out->bsize = in->bsize;
 				memcpy(out->bytes, in->bytes, out->bsize);
+			} // bytes need to be copied
+			if (in->string != NULL) {
+				out->string = malloc(strlen(in->string) + 1);
+				if (out->string == NULL) {
+					if (out->bsize > 0)
+						free(out->bytes);
+					free(out);
+					return NULL;
+				}
 				strcpy(out->string, in->string);
-				return 1;
-			} // string allocated
-			free(out->bytes);
-		} // bytes allocated
+			} // string needs to be copied
+		} // structure allocated
 	} // good parameters
-	return 0;
+	return out;
 }
 
 /**
