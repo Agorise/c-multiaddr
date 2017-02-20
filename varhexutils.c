@@ -132,17 +132,15 @@ unsigned char* Hex_To_Var(const char* incoming, size_t* num_bytes) //HEX TO VAR[
 	retVal = (unsigned char*)malloc(*num_bytes);
 
 	char code[3];
-	code[3]='\0';
-	int i=0;
-	for(i=0; i < incoming_size; i += 2)
+	code[2]='\0';
+	int pos = 0;
+	for(int i=0; i < incoming_size; i += 2)
 	{
 		code[0] = incoming[i];
 		code[1] = incoming[i+1];
-    	char *ck = NULL;
-    	uint64_t lu = 0;
-    	lu=strtoul(code, &ck, 16);
-		retVal[i] = lu;
-		i++;
+    	uint64_t lu = strtol(code, NULL, 16);
+		retVal[pos] = (unsigned int)lu;
+		pos++;
 	}
 	return retVal;
 }

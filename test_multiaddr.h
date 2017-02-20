@@ -42,7 +42,25 @@ int test_full() {
 	return 1;
 }
 
-int test_hex_to_val() {
-	return 0;
+int test_hex_to_var() {
+	size_t d;
+	unsigned char* result = Hex_To_Var("04", &d);
+	if (d != 1)
+		return 0;
+	if (result[0] != 4)
+		return 0;
+
+	if (result != NULL)
+		free(result);
+	return 1;
+}
+
+int test_int_to_hex() {
+	int val = 2555351;
+	char* result = Int_To_Hex(val);
+	int retVal = Hex_To_Int(result);
+	if (retVal != val)
+		return 0;
+	return 1;
 }
 

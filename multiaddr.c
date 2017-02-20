@@ -72,7 +72,7 @@ struct MultiAddress* multiaddress_new_from_string(const char* straddress)//Const
 		}
 		strcpy(out->string, straddress);
 
-		if (string_to_bytes(&out->bytes, &out->bsize, out->string, strlen(out->string)) == 0 )
+		if (string_to_bytes(&(out->bytes), &out->bsize, out->string, strlen(out->string)) == 0 )
 		{
 			multiaddress_free(out);
 			return NULL;
