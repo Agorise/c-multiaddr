@@ -31,8 +31,13 @@ uint64_t ip2int(const char * ipconvertint);
 
 char * int2ip(int inputintip);
 
-//I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char** resultzx, const uint8_t * catx,int xbsize);
+/**
+ * Unserialize the bytes into a string
+ * @param results where to put the resultant string
+ * @param bytes the bytes to unserialize
+ * @param bytes_size the length of the bytes array
+ */
+int bytes_to_string(char** results, const uint8_t* bytes, int bytes_size);
 
 char * address_string_to_bytes(struct Protocol * xx, const char * abc, size_t getsznow);
 

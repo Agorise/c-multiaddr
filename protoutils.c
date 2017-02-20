@@ -290,20 +290,26 @@ char * int2ip(int inputintip)
 	sprintf(xxx_int2ip_result, "%d.%d.%d.%d", ipint0,ipint1,ipint2,ipint3);
 	return xxx_int2ip_result;
 }
-//I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char** buffer, const uint8_t* catx, int xbsize)
+
+/**
+ * Unserialize the bytes into a string
+ * @param results where to put the resultant string
+ * @param in_bytes the bytes to unserialize
+ * @param in_bytes_size the length of the bytes array
+ */
+int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 {
 	*buffer = malloc(800);
 	char* resultzx = *buffer;
 	bzero(resultzx, 800);
 	uint8_t * bytes = NULL;
 	int size = 0;
-	size = xbsize;
+	size = in_bytes_size;
 	struct ProtocolListItem* head = NULL;
 	load_protocols(&head);
-	char hex[xbsize*2];
-	bzero(hex,xbsize*2);
-	strcat(hex,Var_To_Hex(size, catx));
+	char hex[in_bytes_size*2];
+	bzero(hex,in_bytes_size*2);
+	strcat(hex,Var_To_Hex(size, in_bytes));
 	//Positioning for memory jump:
 	int lastpos = 0;
 	char pid[3];
