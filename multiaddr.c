@@ -141,15 +141,34 @@ int multiaddress_encapsulate(struct MultiAddress* result, char* string)
 			free(result->bytes);
 		result->bytes = NULL;
 		result->bsize = 0;
+		char * exstr;
+		if(string[0] == '/')
+		{
+			exstr = (char *) malloc(strlen(result->string)+1);
+		}
+		else
+		{
+			exstr = (char *) malloc(strlen(result->string));
+		}
+		strcpy(exstr, result->string);
 		free(result->string);
 		// insert the new values
-		result->string = malloc(strlen(string) + 1);
+		result->string = malloc(strlen(string) + strlen(exstr) + 1);
 		if (result->string == NULL) {
 			multiaddress_free(result);
 			return 0;
 		}
-		strcpy(result->string, string);
-		if(string_to_bytes(&result->bytes, &result->bsize, result->string, sizeof(result->string)) == 0)
+		strcpy(result->string, exstr);
+		free(exstr);
+		if(string[0] == '/')
+		{
+			strcat(result->string, string+1);
+		}
+		else
+		{
+			strcat(result->string, string);
+		}
+		if(string_to_bytes(&result->bytes, &result->bsize, result->string, strlen(result->string)+1) == 0)
 		{
 			multiaddress_free(result);
 			return 0;
@@ -209,4 +228,3 @@ int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 		return 0;
 	}
 }
-
