@@ -35,7 +35,7 @@ int test_full() {
 	multiaddress_encapsulate(a,"/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG");
 	printf("A STRING ENCAPSULATED IPFS:%s\n",a->string);
 	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
-	printf("TEST BYTE SIZE: %u\n",a->bsize);
+	printf("TEST BYTE SIZE: %lu\n",a->bsize);
 
 	struct MultiAddress* beta;
 	beta = multiaddress_new_from_bytes(a->bytes,a->bsize);
