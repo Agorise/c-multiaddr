@@ -15,7 +15,7 @@ int test_new_from_string() {
 
 int test_full() {
 	char addrstr[100];
-	strcpy(addrstr,"/ip4/192.168.1.1/tcp/8080/");
+	strcpy(addrstr,"/ip4/192.168.1.1/");
 	printf("INITIAL: %s\n",addrstr);
 	struct MultiAddress* a;
 	a= multiaddress_new_from_string(addrstr);
@@ -24,14 +24,18 @@ int test_full() {
 	//Remember, Decapsulation happens from right to left, never in reverse!
 
 	printf("A STRING:%s\n",a->string);
-	multiaddress_encapsulate(a,"/ip4/192.131.200.111/udp/3333/");
+	multiaddress_encapsulate(a,"/udp/3333/");
 	printf("A STRING ENCAPSULATED:%s\n",a->string);
-
+	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
 	multiaddress_decapsulate(a,"udp");
 	printf("A STRING DECAPSULATED UDP:%s\n",a->string);
-
-	multiaddress_encapsulate(a,"/tcp/8080");
-	printf("A STRING ENCAPSULATED TCP:%s\n",a->string);
+	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	multiaddress_encapsulate(a,"/udp/3333/");
+	printf("A STRING ENCAPSULATED UDP: %s\n",a->string);
+	multiaddress_encapsulate(a,"/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG");
+	printf("A STRING ENCAPSULATED IPFS:%s\n",a->string);
+	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	printf("TEST BYTE SIZE: %u\n",a->bsize);
 
 	struct MultiAddress* beta;
 	beta = multiaddress_new_from_bytes(a->bytes,a->bsize);

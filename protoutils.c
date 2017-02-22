@@ -314,15 +314,18 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 	int lastpos = 0;
 	char pid[3];
 	//Process Hex String
+	//printf("FULL HEX: %s", hex);
 	NAX:
+	//printf("REDO!!!!!\n");
 	//Stage 1 ID:
 	if(lastpos!=0)
 	{
-		lastpos++;
+		//lastpos++;
 	}
 	pid[0] = hex[lastpos];
 	pid[1] = hex[lastpos+1];
 	pid[2] = '\0';
+	//printf("pid: %s\n",pid);
 	if(proto_with_deccode(head, Hex_To_Int(pid)))
 	{
 //////////Stage 2: Address
@@ -347,7 +350,7 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 			//printf("Protocol: %s\n", PID->name);
 			//printf("Address : %s\n", address);
 			lastpos= lastpos+(PID->size/4);
-			//printf("lastpos: %d",lastpos);
+			//printf("lastpos: %d\n",lastpos);
 
 	//////////Address:
 			//Keeping Valgrind happy
@@ -416,7 +419,7 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 			unsigned char * pointyaddr = NULL;
 			pointyaddr = rezultat;
 			int returnstatus = 0;
-			returnstatus = multiaddr_encoding_base58_encode(addrbuf, sizeof(addrbuf), &pointyaddr, &rezbuflen);
+			returnstatus = multiaddr_encoding_base58_encode(addrbuf, sizeof(IPFS_ADDR)/2, &pointyaddr, &rezbuflen);
 			free(addrbuf);
 			if(returnstatus == 0)
 			{
@@ -566,16 +569,15 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 		}
 		case 42://IPFS - !!!
 		{
-
-
 			char * x_data = NULL;
-			x_data = (char*)abc;
+			x_data = (char*) abc;
 			size_t x_data_length = strlen(x_data);
-			size_t result_buffer_length = multiaddr_encoding_base58_decode_size((unsigned char*)x_data);
+			size_t result_buffer_length = multiaddr_encoding_base58_decode_max_size((unsigned char*)x_data);
 			unsigned char result_buffer[result_buffer_length];
 			unsigned char* ptr_to_result = result_buffer;
 			memset(result_buffer, 0, result_buffer_length);
 			// now get the decoded address
+
 			int return_value = multiaddr_encoding_base58_decode(x_data, x_data_length, &ptr_to_result, &result_buffer_length);
 			if (return_value == 0)
 			{
@@ -594,7 +596,7 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 				unsigned char c = ptr_to_result[i];
 				char miu[3];
 				bzero(miu, 3);
-				miu[3] = '\0';
+				miu[2] = '\0';
 				sprintf(miu,"%02x", c);
 
 				strcat(ADDR_ENCODED, miu);
@@ -602,7 +604,7 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 			ilen = strlen(ADDR_ENCODED);
 			char prefixed[3];
 			strcpy(prefixed,Num_To_HexVar_32(ilen));
-			prefixed[3] = '\0';
+			prefixed[2] = '\0';
 			strcat(returning_result, prefixed);
 			strcat(returning_result, ADDR_ENCODED);
 			//printf("ADDRESS: %s\nSIZEADDR: %d\n",ADDR_ENCODED,ilen);

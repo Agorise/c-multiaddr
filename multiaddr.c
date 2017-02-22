@@ -215,6 +215,16 @@ int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 					procstr[i] = '/';
 				}
 			}
+			//Bytes update
+			if (result->bytes != NULL)
+				free(result->bytes);
+			result->bytes = NULL;
+			result->bsize = 0;
+			if(string_to_bytes(&result->bytes, &result->bsize, result->string, strlen(result->string)+1) == 0)
+			{
+				multiaddress_free(result);
+				return 0;
+			}
 			return 1;
 		}
 		else
@@ -228,3 +238,4 @@ int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 		return 0;
 	}
 }
+
