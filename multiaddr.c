@@ -179,7 +179,12 @@ int multiaddress_encapsulate(struct MultiAddress* result, char* string)
 	return 1;
 }
 
-// not sure what this does
+/**
+ * Find scri and remove it from the resultant value
+ * (ie /ip4/127.0.0.1/tcp/4001 becomes ip4/127.0.0.1 when you call decapsulate(addr, "/tcp")
+ * @param result the address to work with
+ * @param srci the string to look for
+ */
 int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 {
 	if(result!=NULL && srci!=NULL)
