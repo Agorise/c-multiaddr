@@ -6,14 +6,16 @@ const char* names[] = {
 		"test_new_from_string",
 		"test_full",
 		"test_hex_to_var",
-		"test_int_to_hex"
+		"test_int_to_hex",
+		"test_multiaddr_utils"
 };
 
 int (*funcs[])(void) = {
 		test_new_from_string,
 		test_full,
 		test_hex_to_var,
-		test_int_to_hex
+		test_int_to_hex,
+		test_multiaddr_utils
 };
 
 int testit(const char* name, int (*func)(void)) {

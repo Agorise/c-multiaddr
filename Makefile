@@ -29,3 +29,5 @@ clean:
 	rm -f *.o
 	rm -f libmultiaddr.a
 	rm -f test_multiaddr
+	
+rebuild: clean all

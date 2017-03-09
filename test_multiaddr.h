@@ -68,3 +68,27 @@ int test_int_to_hex() {
 	return 1;
 }
 
+int test_multiaddr_utils() {
+	struct MultiAddress* addr = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/4001");
+	if (!multiaddress_is_ip(addr)) {
+		fprintf(stderr, "The address should be an IP\n");
+		return 0;
+	}
+	char* ip = NULL;
+	multiaddress_get_ip_address(addr, &ip);
+	if (ip == NULL) {
+		fprintf(stderr, "get_ip_address returned NULL\n");
+		return 0;
+	}
+	if(strcmp(ip, "127.0.0.1") != 0) {
+		fprintf(stderr, "ip addresses are not equal\n");
+		return 0;
+	}
+	int port = multiaddress_get_ip_port(addr);
+	if (port != 4001) {
+		fprintf(stderr, "port incorrect. %d was returned instead of %d\n", port, 4001);
+		return 0;
+	}
+	return 1;
+}
+

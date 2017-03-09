@@ -50,8 +50,34 @@ void multiaddress_free(struct MultiAddress* in);
 
 struct MultiAddress* multiaddress_copy(const struct MultiAddress* source);
 
+// helpers to parse the MultiAddress struct
+
 int multiaddress_encapsulate(struct MultiAddress * result, char * string);
 
 int multiaddress_decapsulate(struct MultiAddress * result, char * srci);
+
+int multiaddress_is_ip(struct MultiAddress* in);
+
+int multiaddress_is_ip4(struct MultiAddress* in);
+
+int multiaddress_is_ip6(struct MultiAddress* in);
+
+int multiaddress_get_ip_family(struct MultiAddress* in);
+
+/***
+ * Pulls the textual representation of the IP address from a multihash
+ * @param in the multihash to parse
+ * @param ip where to put the ip address
+ * @returns true(1) on success, otherwise 0
+ */
+int multiaddress_get_ip_address(struct MultiAddress* in, char** ip);
+
+/***
+ * Pulls the IP port from a multiaddress
+ * @param in the multiaddress
+ * @param port where to put the port
+ * @returns the port, or a negative number for an error
+ */
+int multiaddress_get_ip_port(struct MultiAddress* in);
 
 #endif
