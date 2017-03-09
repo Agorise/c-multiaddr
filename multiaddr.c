@@ -83,23 +83,23 @@ struct MultiAddress* multiaddress_new_from_string(const char* straddress)//Const
 	return out;
 }
 
-int multiaddress_is_ip(struct MultiAddress* in) {
+int multiaddress_is_ip(const struct MultiAddress* in) {
 	int byte = in->bytes[0];
 
 	if (byte == 4 || byte == 41)
 		return 1;
 	return 0;
 }
-int multiaddress_is_ip4(struct MultiAddress* in) {
+int multiaddress_is_ip4(const struct MultiAddress* in) {
 	return in->bytes[0] == 4;
 }
 
-int multiaddress_is_ip6(struct MultiAddress* in) {
+int multiaddress_is_ip6(const struct MultiAddress* in) {
 	return in->bytes[0] == 41;
 }
 
 
-int multiaddress_get_ip_family(struct MultiAddress* in) {
+int multiaddress_get_ip_family(const struct MultiAddress* in) {
 	if (in->bytes[0] == 4)
 		return AF_INET;
 	if (in->bytes[0] == 41)
@@ -113,7 +113,7 @@ int multiaddress_get_ip_family(struct MultiAddress* in) {
  * @param ip where to put the ip address
  * @returns true(1) on success, otherwise 0
  */
-int multiaddress_get_ip_address(struct MultiAddress* in, char** ip) {
+int multiaddress_get_ip_address(const struct MultiAddress* in, char** ip) {
 	// the incoming address is not what was expected
 	if (strncmp(in->string, "/ip4/", 5) != 0 && strncmp(in->string, "/ip6/", 5) != 0)
 		return 0;
@@ -138,7 +138,7 @@ int multiaddress_get_ip_address(struct MultiAddress* in, char** ip) {
  * @param port where to put the port
  * @returns the port, or a negative number for an error
  */
-int multiaddress_get_ip_port(struct MultiAddress* in) {
+int multiaddress_get_ip_port(const struct MultiAddress* in) {
 	char* ptr = strstr(in->string, "/tcp/");
 	if (ptr == NULL)
 		ptr = strstr(in->string, "/udp/");
