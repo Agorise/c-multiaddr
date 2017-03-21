@@ -9,7 +9,8 @@
 #include "multiaddr/varhexutils.h"
 #include "multiaddr/protocols.h"
 #include "multiaddr/protoutils.h"
-#include "multiaddr/string_tokenizer.h"
+
+extern char *strtok_r(char *, const char *, char **);
 
 //////////////////////////////////////////////////////////
 char ASCII2bits(char ch) {
@@ -683,7 +684,7 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 	//Starting to extract words and process them:
 	char * wp;
 	char * end;
-	wp=ma_utils_strtok_r(pstring,"/",&end);
+	wp=strtok_r(pstring,"/",&end);
 	struct Protocol * protx;
 	while(wp)
 	{
@@ -719,7 +720,7 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 			protx=NULL;//Since right now it doesn't need that assignment anymore.
 			firstorsecond=1;//Since the next word will be an protocol
 		}
-		wp=ma_utils_strtok_r(NULL,"/",&end);
+		wp=strtok_r(NULL,"/",&end);
 	}
 	protx=NULL;
 	unload_protocols(head);

@@ -12,7 +12,7 @@ LFLAGS = -lm
 DEPS = include/multiaddr/base58.h include/multiaddr/endian.h include/multiaddr/multiaddr.h \
 	include/multiaddr/protocols.h include/multiaddr/protoutils.h include/multiaddr/varhexutils.h \
 	include/multiaddr/varint.h
-OBJS = base58.o varint.o varhexutils.o protoutils.o protocols.o multiaddr.o string_tokenizer.o
+OBJS = base58.o varint.o varhexutils.o protoutils.o protocols.o multiaddr.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
