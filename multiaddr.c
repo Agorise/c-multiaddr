@@ -117,7 +117,7 @@ int multiaddress_get_ip_address(const struct MultiAddress* in, char** ip) {
 	// the incoming address is not what was expected
 	if (strncmp(in->string, "/ip4/", 5) != 0 && strncmp(in->string, "/ip6/", 5) != 0)
 		return 0;
-	if (strstr(in->string, "/tcp/") == NULL && strstr(in->string, "/udp/") != NULL)
+	if (strstr(in->string, "/tcp/") == NULL && strstr(in->string, "/udp/") == NULL)
 		return 0;
 	// ip
 	char* str = malloc(strlen(in->string));
