@@ -129,7 +129,7 @@ int multiaddress_get_ip_address(const struct MultiAddress* in, char** ip) {
 	*ip = malloc(strlen(str) + 1);
 	strcpy(*ip, str);
 	free(str);
-	return 0;
+	return 1;
 }
 
 /***
@@ -155,6 +155,13 @@ int multiaddress_get_ip_port(const struct MultiAddress* in) {
 	return atoi(str);
 }
 
+char* multiaddress_get_peer_id(const struct MultiAddress* in) {
+	char* ptr = strstr(in->string, "/ipfs/");
+	if (ptr == NULL)
+		return NULL;
+	return &ptr[6];
+}
+
 void multiaddress_free(struct MultiAddress* in) {
 	if (in != NULL) {
 		if (in->bytes != NULL)
@@ -169,8 +176,7 @@ void multiaddress_free(struct MultiAddress* in) {
 /**
  * Copy a multiaddress from one memory location to another
  * @param in the source
- * @param out the destination. NOTE: memory for out should be preallocated
- * @returns true(1) on success, otherwise false(0)
+ * @returns the new struct MultiAddress or NULL if there was a problem (i.e. out of memory)
  */
 struct MultiAddress* multiaddress_copy(const struct MultiAddress* in) {
 	struct MultiAddress* out = NULL;

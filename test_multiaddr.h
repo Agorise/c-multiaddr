@@ -92,3 +92,26 @@ int test_multiaddr_utils() {
 	return 1;
 }
 
+int test_multiaddr_peer_id() {
+	char* orig_address = "QmKhhKHkjhkjhKjhiuhKJh";
+	char full_string[255];
+	char* result = NULL;
+	int retVal = 0;
+	struct MultiAddress* addr;
+
+	sprintf(full_string, "/ip4/127.0.0.1/tcp/4001/ipfs/%s", orig_address);
+
+	addr = multiaddress_new_from_string(full_string);
+
+	result = multiaddress_get_peer_id(addr);
+
+	if (result == NULL || strncmp(result, orig_address, strlen(orig_address)) != 0)
+		goto exit;
+
+	retVal = 1;
+	exit:
+	if (addr != NULL)
+		multiaddress_free(addr);
+	return retVal;
+}
+
