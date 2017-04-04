@@ -8,7 +8,8 @@ const char* names[] = {
 		"test_hex_to_var",
 		"test_int_to_hex",
 		"test_multiaddr_utils",
-		"test_multiaddr_peer_id"
+		"test_multiaddr_peer_id",
+		"test_multiaddr_bytes"
 };
 
 int (*funcs[])(void) = {
@@ -17,7 +18,8 @@ int (*funcs[])(void) = {
 		test_hex_to_var,
 		test_int_to_hex,
 		test_multiaddr_utils,
-		test_multiaddr_peer_id
+		test_multiaddr_peer_id,
+		test_multiaddr_bytes
 };
 
 int testit(const char* name, int (*func)(void)) {

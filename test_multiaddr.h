@@ -69,7 +69,7 @@ int test_int_to_hex() {
 }
 
 int test_multiaddr_utils() {
-	struct MultiAddress* addr = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/4001");
+	struct MultiAddress* addr = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/4001/");
 	if (!multiaddress_is_ip(addr)) {
 		fprintf(stderr, "The address should be an IP\n");
 		return 0;
@@ -113,5 +113,27 @@ int test_multiaddr_peer_id() {
 	if (addr != NULL)
 		multiaddress_free(addr);
 	return retVal;
+}
+
+int test_multiaddr_bytes() {
+	int retVal = 0;
+	char* orig_address = "/ip4/127.0.0.1/tcp/4001/";
+	struct MultiAddress *orig = NULL, *result = NULL;
+
+	orig = multiaddress_new_from_string(orig_address);
+
+	result = multiaddress_new_from_bytes(orig->bytes, orig->bsize);
+
+	if (strcmp(orig_address, result->string) != 0)
+		goto exit;
+
+	retVal = 1;
+	exit:
+	if (orig != NULL)
+		multiaddress_free(orig);
+	if (result != NULL)
+		multiaddress_free(result);
+	return retVal;
+
 }
 
