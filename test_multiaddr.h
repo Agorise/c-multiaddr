@@ -124,8 +124,10 @@ int test_multiaddr_bytes() {
 
 	result = multiaddress_new_from_bytes(orig->bytes, orig->bsize);
 
-	if (strcmp(orig_address, result->string) != 0)
+	if (strcmp(orig_address, result->string) != 0) {
+		fprintf(stderr, "%s does not equal %s\n", orig_address, result->string);
 		goto exit;
+	}
 
 	retVal = 1;
 	exit:

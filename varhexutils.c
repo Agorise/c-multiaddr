@@ -97,12 +97,8 @@ void vthconvert(int size, char * crrz01, const uint8_t * xbuf)
 		int i;
 		for(i=0; i < (size*2); i++)
 		{
-			if(buf[i]!='\0')
-			{
-				sprintf (conv_proc, "%02X", buf[i]);
-				//printf("%d:%d\n",i, buf[i]);
-				strcat(crrz1, conv_proc);
-			}
+			sprintf (conv_proc, "%02X", buf[i]);
+			strcat(crrz1, conv_proc);
 		}
 		crrz1 = NULL;
 	}
