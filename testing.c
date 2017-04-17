@@ -9,6 +9,7 @@ const char* names[] = {
 		"test_int_to_hex",
 		"test_multiaddr_utils",
 		"test_multiaddr_peer_id",
+		"test_multiaddr_get_peer_id",
 		"test_multiaddr_bytes"
 };
 
@@ -19,6 +20,7 @@ int (*funcs[])(void) = {
 		test_int_to_hex,
 		test_multiaddr_utils,
 		test_multiaddr_peer_id,
+		test_multiaddr_get_peer_id,
 		test_multiaddr_bytes
 };
 

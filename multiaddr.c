@@ -159,10 +159,28 @@ int multiaddress_get_ip_port(const struct MultiAddress* in) {
 }
 
 char* multiaddress_get_peer_id(const struct MultiAddress* in) {
-	char* ptr = strstr(in->string, "/ipfs/");
-	if (ptr == NULL)
-		return NULL;
-	return &ptr[6];
+	char* result = NULL;
+	int str_len = 0;
+	char* slash = NULL;
+	char* ptr = NULL;
+
+	ptr = strstr(in->string, "/ipfs/");
+	if (ptr != NULL && ptr[6] != 0) {
+		ptr += 6;
+		str_len = strlen(ptr);
+		slash = strchr(ptr, '/');
+		if (slash != NULL) {
+			str_len = slash - ptr;
+		}
+		if (str_len > 0) {
+			result = malloc(str_len + 1);
+			if (result != NULL) {
+				memset(result, 0, str_len);
+				memcpy(result, ptr, str_len);
+			}
+		}
+	}
+	return result;
 }
 
 void multiaddress_free(struct MultiAddress* in) {

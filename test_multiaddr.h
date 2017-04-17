@@ -114,7 +114,7 @@ int test_multiaddr_peer_id() {
 	char full_string[255];
 	char* result = NULL;
 	char* bytes = NULL;
-	int retVal = 0;
+	int retVal = 0, port = 0;
 	struct MultiAddress *addr = NULL, *addr2 = NULL;
 
 	sprintf(full_string, "/ip4/127.0.0.1/tcp/4001/ipfs/%s/", orig_address);
@@ -123,9 +123,10 @@ int test_multiaddr_peer_id() {
 
 	result = multiaddress_get_peer_id(addr);
 
-	if (result == NULL || strncmp(result, orig_address, strlen(orig_address)) != 0)
+	if (result == NULL || strcmp(result, orig_address) != 0)
 		goto exit;
 
+	free(result);
 	result = NULL;
 
 	// switch to bytes and back again to verify the peer id follows...
@@ -155,11 +156,19 @@ int test_multiaddr_peer_id() {
 		goto exit;
 	}
 
-	int port = multiaddress_get_ip_port(addr2);
+	port = multiaddress_get_ip_port(addr2);
 	if (port != 4001) {
 		fprintf(stderr, "Original string had port 4001, but now reporting %d\n", port);
 		goto exit;
 	}
+
+	result = multiaddress_get_peer_id(addr2);
+	if (strcmp(result, orig_address) != 0) {
+		fprintf(stderr, "New peer id %s does not match %s", result, orig_address);
+		goto exit;
+	}
+	free(result);
+	result = NULL;
 
 	retVal = 1;
 	exit:
@@ -171,6 +180,30 @@ int test_multiaddr_peer_id() {
 		free(result);
 	if (bytes != NULL)
 		free(bytes);
+	return retVal;
+}
+
+int test_multiaddr_get_peer_id() {
+	char* orig_address = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG";
+	char full_string[255];
+	char* result = NULL;
+	int retVal = 0;
+	struct MultiAddress *addr = NULL;
+
+	sprintf(full_string, "/ip4/127.0.0.1/tcp/4001/ipfs/%s/", orig_address);
+
+	addr = multiaddress_new_from_string(full_string);
+
+	result = multiaddress_get_peer_id(addr);
+
+	if (result == NULL || strcmp(result, orig_address) != 0)
+		goto exit;
+
+	retVal = 1;
+	exit:
+	multiaddress_free(addr);
+	free(result);
+	result = NULL;
 	return retVal;
 }
 
