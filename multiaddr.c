@@ -175,7 +175,7 @@ char* multiaddress_get_peer_id(const struct MultiAddress* in) {
 		if (str_len > 0) {
 			result = malloc(str_len + 1);
 			if (result != NULL) {
-				memset(result, 0, str_len);
+				memset(result, 0, str_len + 1);
 				memcpy(result, ptr, str_len);
 			}
 		}

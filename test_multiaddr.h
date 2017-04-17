@@ -184,8 +184,8 @@ int test_multiaddr_peer_id() {
 }
 
 int test_multiaddr_get_peer_id() {
-	char* orig_address = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG";
-	char full_string[255];
+	const char* orig_address = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG";
+	char full_string[255] = "";
 	char* result = NULL;
 	int retVal = 0;
 	struct MultiAddress *addr = NULL;
@@ -196,7 +196,10 @@ int test_multiaddr_get_peer_id() {
 
 	result = multiaddress_get_peer_id(addr);
 
-	if (result == NULL || strcmp(result, orig_address) != 0)
+	if (result == NULL)
+		goto exit;
+
+	if (strcmp(orig_address, result) != 0)
 		goto exit;
 
 	retVal = 1;
