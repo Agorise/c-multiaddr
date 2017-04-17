@@ -124,7 +124,6 @@ int multiaddr_encoding_base58_decode(const char* b58, size_t base58_size, unsign
  * @param base58_size the size of the results buffer
  * @returns true(1) on success
  */
-//int libp2p_crypto_encoding_base58_encode(const unsigned char* binary_data, size_t binary_data_size, unsigned char* base58, size_t* base58_size)
 int multiaddr_encoding_base58_encode(const unsigned char* data, size_t binsz, unsigned char** b58, size_t* b58sz)
 {
 	const uint8_t* bin = data;

@@ -39,7 +39,16 @@ char * int2ip(int inputintip);
  */
 int bytes_to_string(char** results, const uint8_t* bytes, int bytes_size);
 
-char * address_string_to_bytes(struct Protocol * xx, const char * abc, size_t getsznow);
+/**
+ * Convert an address string to a byte representation
+ * @param protocol the protocol to use
+ * @param incoming the byte array
+ * @param incoming_size the size of the byte array
+ * @param results the results
+ * @param results_size the size of the results
+ * @returns the results array
+ */
+char * address_string_to_bytes(struct Protocol *protocol, const char *incoming, size_t incoming_size, char** results, int *results_size);
 
 int string_to_bytes(uint8_t** finalbytes,size_t* realbbsize, const char * strx, size_t strsize);
 

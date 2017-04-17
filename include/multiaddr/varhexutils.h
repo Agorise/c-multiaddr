@@ -28,10 +28,13 @@ char * Int_To_Hex(uint64_t int2hex); //VAR[binformat] TO HEX
 
 uint64_t Hex_To_Int(char * hax);
 
-//
-void vthconvert(int size, char * crrz01, uint8_t * xbuf);
-
-char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT); //VAR[binformat] TO HEX
+/**
+ * Convert binary array to array of hex values
+ * @param incoming the binary array
+ * @param incoming_size the size of the incoming array
+ * @returns the allocated array
+ */
+unsigned char *Var_To_Hex(const char *incoming, int incoming_size);
 
 /**
  * Turn a hex string into a byte array

@@ -302,87 +302,75 @@ char * int2ip(int inputintip)
  */
 int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 {
-	*buffer = malloc(800);
-	char* resultzx = *buffer;
-	bzero(resultzx, 800);
 	uint8_t * bytes = NULL;
-	int size = 0;
-	size = in_bytes_size;
+	char *results = NULL;
+	int size = in_bytes_size;
 	struct ProtocolListItem* head = NULL;
-	load_protocols(&head);
-	char hex[in_bytes_size*2];
-	bzero(hex,in_bytes_size*2);
-	strcat(hex,Var_To_Hex(size, in_bytes));
+	char hex[(in_bytes_size*2)+1];
 	//Positioning for memory jump:
 	int lastpos = 0;
 	char pid[3];
+
+	// set up variables
+	load_protocols(&head);
+	memset(hex, 0, (in_bytes_size * 2) + 1);
+	char* tmp = Var_To_Hex(in_bytes, size);
+	memcpy(hex, tmp, in_bytes_size * 2);
+	free(tmp);
+	pid[2] = 0;
+
+	// allocate memory for results
+	*buffer = malloc(800);
+	results = *buffer;
+	memset(results, 0, 800);
+
+
 	//Process Hex String
-	//printf("FULL HEX: %s", hex);
 	NAX:
-	//printf("REDO!!!!!\n");
 	//Stage 1 ID:
-	if(lastpos!=0)
-	{
-		//lastpos++;
-	}
 	pid[0] = hex[lastpos];
 	pid[1] = hex[lastpos+1];
-	pid[2] = '\0';
-	//printf("pid: %s\n",pid);
-	if(proto_with_deccode(head, Hex_To_Int(pid)))
+
+	int protocol_int = Hex_To_Int(pid);
+	struct Protocol* protocol = proto_with_deccode(head, protocol_int);
+	if(protocol != NULL)
 	{
-//////////Stage 2: Address
-		struct Protocol * PID;
-		PID = NULL;
-		PID = proto_with_deccode(head, Hex_To_Int(pid));
-		if(strcmp(PID->name,"ipfs")!=0)
+		//////////Stage 2: Address
+		if(strcmp(protocol->name,"ipfs")!=0)
 		{
 			lastpos = lastpos+2;
-			char address[(PID->size/4)+1];
-			bzero(address,(PID->size/4)+1);
-			address[(PID->size/4)]='\0';
-			int x=0;
-			//printf("\nHEX TO DECODE: %s\n",hex);
-			for(int i = lastpos;i<(PID->size/4)+lastpos;i++)
-			{
-				address[x] = hex[i];
-				//printf("HEX[%d]=%c\n",i,hex[i]);
-				x++;
-			}
-	//////////Stage 3 Process it back to string
-			//printf("Protocol: %s\n", PID->name);
-			//printf("Address : %s\n", address);
-			lastpos= lastpos+(PID->size/4);
-			//printf("lastpos: %d\n",lastpos);
+			char address[(protocol->size/4)+1];
+			memset(address, 0, (protocol->size / 4) + 1);
+			memcpy(address, &hex[lastpos], protocol->size / 4);
+			//////////Stage 3 Process it back to string
+			lastpos= lastpos+(protocol->size/4);
 
-	//////////Address:
+			//////////Address:
 			//Keeping Valgrind happy
 			char name[30];
 			bzero(name,30);
-			strcpy(name, PID->name);
+			strcpy(name, protocol->name);
 			//
-			strcat(resultzx, "/");
-			strcat(resultzx, name);
-			strcat(resultzx, "/");
+			strcat(results, "/");
+			strcat(results, name);
+			strcat(results, "/");
 			if(strcmp(name, "ip4")==0)
 			{
-				strcat(resultzx,int2ip(Hex_To_Int(address)));
+				strcat(results,int2ip(Hex_To_Int(address)));
 			}
 			else if(strcmp(name, "tcp")==0)
 			{
 				char a[5];
 					sprintf(a,"%lu",Hex_To_Int(address));
-					strcat(resultzx,a);
+					strcat(results,a);
 			}
 			else if(strcmp(name, "udp")==0)
 			{
 				char a[5];
 				sprintf(a,"%lu",Hex_To_Int(address));
-				strcat(resultzx,a);
+				strcat(results,a);
 			}
-			//printf("Address(hex):%s\n",address);
-			//printf("TESTING: %s\n",resultzx);
-	/////////////Done processing this, move to next if there is more.
+			/////////////Done processing this, move to next if there is more.
 			if(lastpos<size*2)
 			{
 				goto NAX;
@@ -390,78 +378,77 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 		}
 		else//IPFS CASE
 		{
-
 			lastpos = lastpos + 4;
-			//FETCHING SIZE OF ADDRESS
+			//fetch the size of the address based on the varint prefix
 			char prefixedvarint[3];
-			bzero(prefixedvarint,3);
-			int pvi;
-			pvi=0;
-			for(int i=lastpos-2;i<lastpos;i++)
-			{
-				prefixedvarint[pvi] = hex[i];
-				pvi++;
-			}
-			int addrsize;
-			addrsize = HexVar_To_Num_32(prefixedvarint);
+			memset(prefixedvarint, 0, 3);
+			memcpy(prefixedvarint, &hex[lastpos-2], 2);
+			int addrsize = HexVar_To_Num_32(prefixedvarint);
+
+			// get the ipfs address as hex values
 			unsigned char IPFS_ADDR[addrsize+1];
-			bzero(IPFS_ADDR,addrsize+1);
-			int IPFS_PARSE;
-			IPFS_PARSE = 0;
-			for(int i = lastpos;i<lastpos+addrsize;i++)
-			{
-				IPFS_ADDR[IPFS_PARSE] = hex[i];
-				//printf("\nIPFS_ADDR[%d] = %c\n\n",IPFS_PARSE,hex[i]);
-				IPFS_PARSE++;
-			}
+			memset(IPFS_ADDR, 0, addrsize + 1);
+			memcpy(IPFS_ADDR, &hex[lastpos], addrsize);
+			// convert the address from hex values to a binary array
 			size_t num_bytes = 0;
 			unsigned char* addrbuf = Hex_To_Var(IPFS_ADDR, &num_bytes);
-			size_t rezbuflen = strlen(IPFS_ADDR);
-			unsigned char rezultat[rezbuflen];
-			bzero(rezultat,rezbuflen);
-			unsigned char * pointyaddr = NULL;
-			pointyaddr = rezultat;
-			int returnstatus = 0;
-			returnstatus = multiaddr_encoding_base58_encode(addrbuf, sizeof(IPFS_ADDR)/2, &pointyaddr, &rezbuflen);
+			size_t b58_size = strlen(IPFS_ADDR);
+			unsigned char b58[b58_size];
+			memset(b58, 0, b58_size);
+			unsigned char *ptr_b58 = b58;
+			int returnstatus = multiaddr_encoding_base58_encode(addrbuf, num_bytes, &ptr_b58, &b58_size);
 			free(addrbuf);
 			if(returnstatus == 0)
 			{
-				printf("\nERROR!!!!!\n");
+				fprintf(stderr, "Unable to base58 encode MultiAddress %s\n", IPFS_ADDR);
 				unload_protocols(head);
 				return 0;
 			}
-			strcat(resultzx, "/");
-			strcat(resultzx, PID->name);
-			strcat(resultzx, "/");
-			strcat(resultzx, rezultat);
+			strcat(results, "/");
+			strcat(results, protocol->name);
+			strcat(results, "/");
+			strcat(results, b58);
 		}
 	}
-	strcat(resultzx, "/");
+	strcat(results, "/");
 	unload_protocols(head);
 	return 1;
-
 }
 //
 
-char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t getsznow)
+/**
+ * Convert an address string to a byte representation
+ * @param protocol the protocol to use
+ * @param incoming the byte array
+ * @param incoming_size the size of the byte array
+ * @param results the results
+ * @param results_size the size of the results
+ * @returns the results array
+ */
+char* address_string_to_bytes(struct Protocol * protocol, const char *incoming, size_t incoming_size, char** results, int* results_size)
 {
 	static char astb__stringy[800] = "\0";
-	bzero(astb__stringy,800);
+	memset(astb__stringy, 0, 800);
+
 	int code = 0;
-	code = xx->deccode;
+	code = protocol->deccode;
+
 	switch(code)
 	{
 		case 4://IPv4
 		{
 			char testip[16] = "\0";
 			bzero(testip,16);
-			strcpy(testip,abc);
+			strcpy(testip,incoming);
 			if(is_valid_ipv4(testip)==1)
 			{
-				uint64_t iip = ip2int(abc);
+				uint64_t iip = ip2int(incoming);
 				strcpy(astb__stringy,Int_To_Hex(iip));
-				xx = NULL;
-				return astb__stringy;
+				protocol = NULL;
+				*results = malloc(strlen(astb__stringy));
+				memcpy(*results, astb__stringy, strlen(astb__stringy));
+				*results_size = strlen(astb__stringy);
+				return *results;
 			}
 			else
 			{
@@ -476,11 +463,11 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 		}
 		case 6: //Tcp
 		{
-			if(atoi(abc)<65536&&atoi(abc)>0)
+			if(atoi(incoming)<65536&&atoi(incoming)>0)
 			{
 				static char himm_woot[5] = "\0";
 				bzero(himm_woot, 5);
-				strcpy(himm_woot, Int_To_Hex(atoi(abc)));
+				strcpy(himm_woot, Int_To_Hex(atoi(incoming)));
 				if(himm_woot[2] == '\0')
 				{//manual switch
 					char swap0='0';
@@ -504,7 +491,10 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 					himm_woot[3] = swap3;
 				}
 				himm_woot[4]='\0';
-				return himm_woot;
+				*results = malloc(5);
+				*results_size = 5;
+				memcpy(*results, himm_woot, 5);
+				return *results;
 			}
 			else
 			{
@@ -514,11 +504,11 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 		}
 		case 17: //Udp
 		{
-			if(atoi(abc)<65536&&atoi(abc)>0)
+			if(atoi(incoming)<65536&&atoi(incoming)>0)
 			{
 				static char himm_woot2[5] = "\0";
 				bzero(himm_woot2, 5);
-				strcpy(himm_woot2, Int_To_Hex(atoi(abc)));
+				strcpy(himm_woot2, Int_To_Hex(atoi(incoming)));
 				if(himm_woot2[2] == '\0')
 				{//Manual Switch2be
 					char swap0='0';
@@ -542,7 +532,10 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 					himm_woot2[3] = swap3;
 				}
 				himm_woot2[4]='\0';
-				return himm_woot2;
+				*results = malloc(5);
+				*results_size = 5;
+				memcpy(*results, himm_woot2, 5);
+				return *results;
 			}
 			else
 			{
@@ -553,98 +546,82 @@ char * address_string_to_bytes(struct Protocol * xx, const char * abc,size_t get
 		case 33://dccp
 		{
 			return "ERR";
-			break;
 		}
 		case 132://sctp
 		{
 			return "ERR";
-			break;
 		}
 		case 301://udt
 		{
 			return "ERR";
-			break;
 		}
 		case 302://utp
 		{
 			return "ERR";
-			break;
 		}
 		case 42://IPFS - !!!
 		{
-			char * x_data = NULL;
-			x_data = (char*) abc;
-			size_t x_data_length = strlen(x_data);
-			size_t result_buffer_length = multiaddr_encoding_base58_decode_max_size((unsigned char*)x_data);
+			// decode the base58 to bytes
+			char * incoming_copy = NULL;
+			incoming_copy = (char*)incoming;
+			size_t incoming_copy_size = strlen(incoming_copy);
+			size_t result_buffer_length = multiaddr_encoding_base58_decode_max_size((unsigned char*)incoming_copy);
 			unsigned char result_buffer[result_buffer_length];
 			unsigned char* ptr_to_result = result_buffer;
 			memset(result_buffer, 0, result_buffer_length);
 			// now get the decoded address
-
-			int return_value = multiaddr_encoding_base58_decode(x_data, x_data_length, &ptr_to_result, &result_buffer_length);
+			int return_value = multiaddr_encoding_base58_decode(incoming_copy, incoming_copy_size, &ptr_to_result, &result_buffer_length);
 			if (return_value == 0)
 			{
 				return "ERR";
 			}
+
 			// throw everything in a hex string so we can debug the results
-			static char returning_result[300];
-			bzero(returning_result,300);
-			char ADDR_ENCODED[300];
-			bzero(ADDR_ENCODED,300);
+			char addr_encoded[300];
+			memset(addr_encoded, 0, 300);
 			int ilen = 0;
-			bzero(returning_result,300);
 			for(int i = 0; i < result_buffer_length; i++)
 			{
 				// get the char so we can see it in the debugger
-				unsigned char c = ptr_to_result[i];
 				char miu[3];
-				bzero(miu, 3);
-				miu[2] = '\0';
-				sprintf(miu,"%02x", c);
-
-				strcat(ADDR_ENCODED, miu);
+				sprintf(miu,"%02x", ptr_to_result[i]);
+				strcat(addr_encoded, miu);
 			}
-			ilen = strlen(ADDR_ENCODED);
+			ilen = strlen(addr_encoded);
 			char prefixed[3];
+			memset(prefixed, 0, 3);
 			strcpy(prefixed,Num_To_HexVar_32(ilen));
-			prefixed[2] = '\0';
-			strcat(returning_result, prefixed);
-			strcat(returning_result, ADDR_ENCODED);
-			//printf("ADDRESS: %s\nSIZEADDR: %d\n",ADDR_ENCODED,ilen);
-			//printf("NOW DECODED VARINT: %d", HexVar_To_Num_32(prefixed));
-			return returning_result;
-			break;
+			*results_size = ilen + 3;
+			*results = malloc(*results_size);
+			memset(*results, 0, *results_size);
+			strcat(*results, prefixed); // 2 bytes
+			strcat(*results, addr_encoded); // ilen bytes + null terminator
+			return *results;
 		}
 		case 480://http
 		{
 			return "ERR";
-			break;
 		}
 		case 443://https
 		{
 			return "ERR";
-			break;
 		}
 		case 477://ws
 		{
 			return "ERR";
-			break;
 		}
 		case 444://onion
 		{
 			return "ERR";
-			break;
 		}
 		case 275://libp2p-webrtc-star
 		{
 			return "ERR";
-			break;
 		}
 		default:
 		{
 			printf("NO SUCH PROTOCOL!\n");
 			return "ERR";
-			break;
 		}
 	}
 }
@@ -690,10 +667,9 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 	{
 		if(firstorsecond==1)//This is the Protocol
 		{
-			if(proto_with_name(head, wp))
+			protx = proto_with_name(head, wp);
+			if(protx != NULL)
 			{
-				protx=proto_with_name(head, wp);
-				//printf("PROTOCOL: %s\n",protx->name);
 				strcat(processed, Int_To_Hex(protx->deccode));
 				firstorsecond=2;//Since the next word will be an address
 			}
@@ -706,16 +682,18 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 		}
 		else//This is the address
 		{
-			//printf("ADDRESS: %s\n",wp);
-			if(address_string_to_bytes(protx, wp,strlen(wp)) == "ERR")
+			char* s_to_b = NULL;
+			int s_to_b_size = 0;
+			if(address_string_to_bytes(protx, wp,strlen(wp), &s_to_b, &s_to_b_size) == "ERR")
 			{
 				malf = 1;
-				//printf("\n\nTRIGGERED!!!!!!!!!!!!!!!!!!!!!!!\n\n");
 			}
 			else
 			{
-				strcat(processed,address_string_to_bytes(protx, wp,strlen(wp)));
-				//printf("Addressinbytes: %s\n",address_string_to_bytes(protx, wp,strlen(wp)));
+				int temp_size = strlen(processed);
+				strncat(processed, s_to_b, s_to_b_size);
+				processed[temp_size + s_to_b_size] = 0;
+				free(s_to_b);
 			}
 			protx=NULL;//Since right now it doesn't need that assignment anymore.
 			firstorsecond=1;//Since the next word will be an protocol

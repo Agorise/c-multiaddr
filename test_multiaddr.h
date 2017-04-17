@@ -1,6 +1,7 @@
 #pragma once
 
 #include "multiaddr/multiaddr.h"
+#include "multiaddr/varhexutils.h"
 
 int test_new_from_string() {
 	struct MultiAddress* a = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/8080/");
@@ -19,22 +20,30 @@ int test_full() {
 	printf("INITIAL: %s\n",addrstr);
 	struct MultiAddress* a;
 	a= multiaddress_new_from_string(addrstr);
-	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	unsigned char* tmp = Var_To_Hex(a->bytes, a->bsize);
+	printf("TEST BYTES: %s\n", tmp);
+	free(tmp);
 
 	//Remember, Decapsulation happens from right to left, never in reverse!
 
 	printf("A STRING:%s\n",a->string);
 	multiaddress_encapsulate(a,"/udp/3333/");
 	printf("A STRING ENCAPSULATED:%s\n",a->string);
-	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	tmp = Var_To_Hex(a->bytes, a->bsize);
+	printf("TEST BYTES: %s\n", tmp);
+	free(tmp);
 	multiaddress_decapsulate(a,"udp");
 	printf("A STRING DECAPSULATED UDP:%s\n",a->string);
-	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	tmp = Var_To_Hex(a->bytes, a->bsize);
+	printf("TEST BYTES: %s\n", tmp);
+	free(tmp);
 	multiaddress_encapsulate(a,"/udp/3333/");
 	printf("A STRING ENCAPSULATED UDP: %s\n",a->string);
 	multiaddress_encapsulate(a,"/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG");
 	printf("A STRING ENCAPSULATED IPFS:%s\n",a->string);
-	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
+	tmp = Var_To_Hex(a->bytes, a->bsize);
+	printf("TEST BYTES: %s\n", tmp);
+	free(tmp);
 	printf("TEST BYTE SIZE: %lu\n",a->bsize);
 
 	struct MultiAddress* beta;
@@ -69,6 +78,7 @@ int test_int_to_hex() {
 }
 
 int test_multiaddr_utils() {
+	int retVal = 0;
 	struct MultiAddress* addr = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/4001/");
 	if (!multiaddress_is_ip(addr)) {
 		fprintf(stderr, "The address should be an IP\n");
@@ -78,28 +88,36 @@ int test_multiaddr_utils() {
 	multiaddress_get_ip_address(addr, &ip);
 	if (ip == NULL) {
 		fprintf(stderr, "get_ip_address returned NULL\n");
-		return 0;
+		goto exit;
 	}
 	if(strcmp(ip, "127.0.0.1") != 0) {
 		fprintf(stderr, "ip addresses are not equal\n");
-		return 0;
+		goto exit;
 	}
 	int port = multiaddress_get_ip_port(addr);
 	if (port != 4001) {
 		fprintf(stderr, "port incorrect. %d was returned instead of %d\n", port, 4001);
-		return 0;
+		goto exit;
 	}
-	return 1;
+
+	retVal = 1;
+	exit:
+	if (ip != NULL)
+		free(ip);
+	if (addr != NULL)
+		multiaddress_free(addr);
+	return retVal;
 }
 
 int test_multiaddr_peer_id() {
-	char* orig_address = "QmKhhKHkjhkjhKjhiuhKJh";
+	char* orig_address = "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG";
 	char full_string[255];
 	char* result = NULL;
+	char* bytes = NULL;
 	int retVal = 0;
-	struct MultiAddress* addr;
+	struct MultiAddress *addr = NULL, *addr2 = NULL;
 
-	sprintf(full_string, "/ip4/127.0.0.1/tcp/4001/ipfs/%s", orig_address);
+	sprintf(full_string, "/ip4/127.0.0.1/tcp/4001/ipfs/%s/", orig_address);
 
 	addr = multiaddress_new_from_string(full_string);
 
@@ -108,10 +126,51 @@ int test_multiaddr_peer_id() {
 	if (result == NULL || strncmp(result, orig_address, strlen(orig_address)) != 0)
 		goto exit;
 
+	result = NULL;
+
+	// switch to bytes and back again to verify the peer id follows...
+
+	// 1. display the original bytes
+	result = Var_To_Hex(addr->bytes, addr->bsize);
+	fprintf(stderr, "Original Bytes: %s\n", result);
+	free(result);
+	result = NULL;
+
+	// make a new MultiAddress from bytes
+	bytes = malloc(addr->bsize);
+	memcpy(bytes, addr->bytes, addr->bsize);
+	addr2 = multiaddress_new_from_bytes(bytes, addr->bsize);
+
+	free(bytes);
+	bytes = NULL;
+
+	// 2. Display the resultant bytes
+	result = Var_To_Hex(addr2->bytes, addr2->bsize);
+	fprintf(stderr, "New      Bytes: %s\n", result);
+	free(result);
+	result = NULL;
+
+	if (strcmp(full_string, addr2->string) != 0) {
+		fprintf(stderr, "Original string was %s but new string is %s\n", full_string, addr2->string);
+		goto exit;
+	}
+
+	int port = multiaddress_get_ip_port(addr2);
+	if (port != 4001) {
+		fprintf(stderr, "Original string had port 4001, but now reporting %d\n", port);
+		goto exit;
+	}
+
 	retVal = 1;
 	exit:
 	if (addr != NULL)
 		multiaddress_free(addr);
+	if (addr2 != NULL)
+		multiaddress_free(addr2);
+	if (result != NULL)
+		free(result);
+	if (bytes != NULL)
+		free(bytes);
 	return retVal;
 }
 

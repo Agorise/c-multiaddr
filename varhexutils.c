@@ -77,41 +77,42 @@ uint64_t Hex_To_Int(char * hax)
 	}
 	return val;
 }
-//
-void vthconvert(int size, char * crrz01, const uint8_t * xbuf)
-{
-	uint8_t buf[400];
-	bzero(buf,400);
 
-	//fixing the buf
-	for(int cz=0; cz<size;cz++)
-	{
-		buf[cz] = xbuf[cz];
-	}
-	//
-	if(crrz01!=NULL)
-	{
-		char * crrz1 = NULL;
-		crrz1 = crrz01;
-		char conv_proc[800]="\0";
-		int i;
-		for(i=0; i < (size*2); i++)
-		{
-			sprintf (conv_proc, "%02X", buf[i]);
-			strcat(crrz1, conv_proc);
-		}
-		crrz1 = NULL;
+/**
+ * Convert a byte array into a hex byte array
+ * @param in the incoming byte array
+ * @param in_size the size of in
+ * @param out the resultant array of hex bytes
+ */
+void vthconvert(const unsigned char* in, int in_size, unsigned char** out)
+{
+	*out = (unsigned char*)malloc( (in_size * 2) + 1);
+	memset(*out, 0, (in_size * 2) + 1);
+	unsigned char *ptr = *out;
+
+	for (int i = 0; i < in_size; i++) {
+		sprintf(&ptr[i * 2], "%02x", in[i]);
 	}
 }
-char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT) //VAR[binformat] TO HEX
+
+/**
+ * Convert binary array to array of hex values
+ * @param incoming the binary array
+ * @param incoming_size the size of the incoming array
+ * @returns the allocated array
+ */
+unsigned char * Var_To_Hex(const unsigned char *incoming, int incoming_size)
 {
-	if(TOHEXINPUT != NULL)
+	if(incoming != NULL)
 	{
-		static char convert_resultz1[800]="\0";
-		bzero(convert_resultz1,800);
-		vthconvert(realsize, convert_resultz1, TOHEXINPUT);
-		return convert_resultz1;
+		unsigned char* retVal = NULL;
+		// this does the real work
+		vthconvert(incoming, incoming_size, &retVal);
+
+		// we can't return an array that will be deallocated!
+		return retVal;
 	}
+	return NULL;
 }
 
 /**
