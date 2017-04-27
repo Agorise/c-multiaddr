@@ -87,10 +87,12 @@ struct MultiAddress* multiaddress_new_from_string(const char* straddress)//Const
 }
 
 int multiaddress_is_ip(const struct MultiAddress* in) {
-	int byte = in->bytes[0];
+	if (in->bytes > 0) {
+		int byte = in->bytes[0];
 
-	if (byte == 4 || byte == 41)
-		return 1;
+		if (byte == 4 || byte == 41)
+			return 1;
+	}
 	return 0;
 }
 int multiaddress_is_ip4(const struct MultiAddress* in) {
