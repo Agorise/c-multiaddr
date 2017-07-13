@@ -51,14 +51,26 @@ uint32_t * Varint_To_Num_32(uint8_t TON32INPUT[60]) //VARINT TO UINT32_t
 	uvarint_decode32(TON32INPUT, 60, &varintdecode_032);
 	return &varintdecode_032;
 }
-//
+/**
+ * Converts a 64 bit integer into a hex string
+ * @param int2hex the 64 bit integer
+ * @returns a hex representation as a string (leading zero if necessary)
+ */
 char * Int_To_Hex(uint64_t int2hex) //VAR[binformat] TO HEX
 {
-	static char int2hex_result[800]="\0";
-	memset(int2hex_result,0,sizeof(int2hex_result));
-	sprintf (int2hex_result, "%02lX", int2hex);
-	return int2hex_result;
+	static char result[50];
+	memset(result, 0, 50);
+	sprintf(result, "%02lX", int2hex);
+	int slen = strlen(result);
+	if (slen % 2 != 0) {
+		for(int i = slen; i >= 0; --i) {
+			result[i+1] = result[i];
+		}
+		result[0] = '0';
+	}
+	return result;
 }
+
 uint64_t Hex_To_Int(char * hax)
 {
 	char * hex = NULL;

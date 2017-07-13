@@ -10,7 +10,8 @@ const char* names[] = {
 		"test_multiaddr_utils",
 		"test_multiaddr_peer_id",
 		"test_multiaddr_get_peer_id",
-		"test_multiaddr_bytes"
+		"test_multiaddr_bytes",
+		"test_new_like_libp2p"
 };
 
 int (*funcs[])(void) = {
@@ -21,7 +22,8 @@ int (*funcs[])(void) = {
 		test_multiaddr_utils,
 		test_multiaddr_peer_id,
 		test_multiaddr_get_peer_id,
-		test_multiaddr_bytes
+		test_multiaddr_bytes,
+		test_new_like_libp2p
 };
 
 int testit(const char* name, int (*func)(void)) {

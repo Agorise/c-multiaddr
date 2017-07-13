@@ -3,6 +3,27 @@
 #include "multiaddr/multiaddr.h"
 #include "multiaddr/varhexutils.h"
 
+int test_new_like_libp2p() {
+	int retVal = 0;
+	char* ip = "10.211.55.2";
+	int port = 4001;
+	char str[strlen(ip) + 50];
+	sprintf(str, "/ip4/%s/tcp/%d/", ip, port);
+	struct MultiAddress* ma_string = multiaddress_new_from_string(str);
+	// convert to binary
+	struct MultiAddress* ma_binary = multiaddress_new_from_bytes(ma_string->bytes, ma_string->bsize);
+	if (strcmp(ma_string->string, ma_binary->string) != 0) {
+		fprintf(stderr, "%s does not equal %s\n", ma_string->string, ma_binary->string);
+		goto exit;
+	}
+
+	retVal = 1;
+	exit:
+	multiaddress_free(ma_string);
+	multiaddress_free(ma_binary);
+	return retVal;
+}
+
 int test_new_from_string() {
 	struct MultiAddress* a = multiaddress_new_from_string("/ip4/127.0.0.1/tcp/8080/");
 	printf("Number of Bytes: %lu, Bytes: ", a->bsize);
