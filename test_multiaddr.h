@@ -167,7 +167,7 @@ int test_multiaddr_peer_id() {
 	bytes = NULL;
 
 	// 2. Display the resultant bytes
-	result = Var_To_Hex((char*)addr2->bytes, addr2->bsize);
+	result = (char*)Var_To_Hex((char*)addr2->bytes, addr2->bsize);
 	fprintf(stderr, "New      Bytes: %s\n", result);
 	free(result);
 	result = NULL;

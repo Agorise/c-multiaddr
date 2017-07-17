@@ -103,7 +103,7 @@ void vthconvert(const unsigned char* in, int in_size, unsigned char** out)
 	unsigned char *ptr = *out;
 
 	for (int i = 0; i < in_size; i++) {
-		sprintf(&ptr[i * 2], "%02x", in[i]);
+		sprintf((char*)&ptr[i * 2], "%02x", in[i]);
 	}
 }
 
