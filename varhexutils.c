@@ -182,7 +182,7 @@ void convert2(char * convert_result2, uint8_t * bufhx)
 {
 	uint8_t * buf = NULL;
 	buf = bufhx;
-	char conv_proc[3]="\0";
+	char conv_proc[4]="\0";
 	conv_proc[3] = '\0';
 	bzero(conv_proc, 3);
 	int i;
@@ -237,7 +237,7 @@ uint32_t HexVar_To_Num_32(char theHEXstring[]) //HEXIFIED VAR TO UINT32_T
 	char codo[800] = "\0";
 	bzero(codo,800);
 	strcpy(codo, theHEXstring);
-	char code[3] = "\0";
+	char code[4] = "\0";
 	bzero(code,3);
 	code[3] = '\0';
 	int x = 0;

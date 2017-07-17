@@ -172,7 +172,7 @@ int is_valid_ipv6(char *str)
            {
               str++;
 
-          if(ishexdigit(*str)||*str==0&&hncount<MAX_HEX_NUMBER_COUNT)
+          if(ishexdigit(*str) || (*str==0 && hncount < MAX_HEX_NUMBER_COUNT ))
           {
              packed=1;
              hncount++;
@@ -299,6 +299,7 @@ char * int2ip(int inputintip)
  * @param results where to put the resultant string
  * @param in_bytes the bytes to unserialize
  * @param in_bytes_size the length of the bytes array
+ * @returns 0 on error, otherwise 1
  */
 int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 {
@@ -314,7 +315,7 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 	// set up variables
 	load_protocols(&head);
 	memset(hex, 0, (in_bytes_size * 2) + 1);
-	char* tmp = Var_To_Hex(in_bytes, size);
+	char* tmp = (char*)Var_To_Hex((char*)in_bytes, size);
 	memcpy(hex, tmp, in_bytes_size * 2);
 	free(tmp);
 	pid[2] = 0;
@@ -391,8 +392,8 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 			memcpy(IPFS_ADDR, &hex[lastpos], addrsize);
 			// convert the address from hex values to a binary array
 			size_t num_bytes = 0;
-			unsigned char* addrbuf = Hex_To_Var(IPFS_ADDR, &num_bytes);
-			size_t b58_size = strlen(IPFS_ADDR);
+			unsigned char* addrbuf = Hex_To_Var((char*)IPFS_ADDR, &num_bytes);
+			size_t b58_size = strlen((char*)IPFS_ADDR);
 			unsigned char b58[b58_size];
 			memset(b58, 0, b58_size);
 			unsigned char *ptr_b58 = b58;
@@ -407,7 +408,7 @@ int bytes_to_string(char** buffer, const uint8_t* in_bytes, int in_bytes_size)
 			strcat(results, "/");
 			strcat(results, protocol->name);
 			strcat(results, "/");
-			strcat(results, b58);
+			strcat(results, (char*)b58);
 		}
 	}
 	strcat(results, "/");
@@ -684,7 +685,7 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 		{
 			char* s_to_b = NULL;
 			int s_to_b_size = 0;
-			if(address_string_to_bytes(protx, wp,strlen(wp), &s_to_b, &s_to_b_size) == "ERR")
+			if( strcmp(address_string_to_bytes(protx, wp,strlen(wp), &s_to_b, &s_to_b_size), "ERR") == 0)
 			{
 				malf = 1;
 			}

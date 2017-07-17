@@ -9,7 +9,7 @@
  * @param binary_data_size the size of the results buffer
  * @returns true(1) on success
  */
-int multiaddr_encoding_base58_decode(const unsigned char* base58, size_t base58_size, unsigned char** binary_data, size_t *binary_data_size);
+int multiaddr_encoding_base58_decode(const char* base58, size_t base58_size, unsigned char** binary_data, size_t *binary_data_size);
 
 /**
  * encode an array of bytes into a base58 string

@@ -41,7 +41,7 @@ int test_full() {
 	printf("INITIAL: %s\n",addrstr);
 	struct MultiAddress* a;
 	a= multiaddress_new_from_string(addrstr);
-	unsigned char* tmp = Var_To_Hex(a->bytes, a->bsize);
+	unsigned char* tmp = Var_To_Hex((char*)a->bytes, a->bsize);
 	printf("TEST BYTES: %s\n", tmp);
 	free(tmp);
 
@@ -50,19 +50,19 @@ int test_full() {
 	printf("A STRING:%s\n",a->string);
 	multiaddress_encapsulate(a,"/udp/3333/");
 	printf("A STRING ENCAPSULATED:%s\n",a->string);
-	tmp = Var_To_Hex(a->bytes, a->bsize);
+	tmp = Var_To_Hex((char*)a->bytes, a->bsize);
 	printf("TEST BYTES: %s\n", tmp);
 	free(tmp);
 	multiaddress_decapsulate(a,"udp");
 	printf("A STRING DECAPSULATED UDP:%s\n",a->string);
-	tmp = Var_To_Hex(a->bytes, a->bsize);
+	tmp = Var_To_Hex((char*)a->bytes, a->bsize);
 	printf("TEST BYTES: %s\n", tmp);
 	free(tmp);
 	multiaddress_encapsulate(a,"/udp/3333/");
 	printf("A STRING ENCAPSULATED UDP: %s\n",a->string);
 	multiaddress_encapsulate(a,"/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG");
 	printf("A STRING ENCAPSULATED IPFS:%s\n",a->string);
-	tmp = Var_To_Hex(a->bytes, a->bsize);
+	tmp = Var_To_Hex((char*)a->bytes, a->bsize);
 	printf("TEST BYTES: %s\n", tmp);
 	free(tmp);
 	printf("TEST BYTE SIZE: %lu\n",a->bsize);
@@ -153,7 +153,7 @@ int test_multiaddr_peer_id() {
 	// switch to bytes and back again to verify the peer id follows...
 
 	// 1. display the original bytes
-	result = Var_To_Hex(addr->bytes, addr->bsize);
+	result = (char*)Var_To_Hex((char*)addr->bytes, addr->bsize);
 	fprintf(stderr, "Original Bytes: %s\n", result);
 	free(result);
 	result = NULL;
@@ -161,13 +161,13 @@ int test_multiaddr_peer_id() {
 	// make a new MultiAddress from bytes
 	bytes = malloc(addr->bsize);
 	memcpy(bytes, addr->bytes, addr->bsize);
-	addr2 = multiaddress_new_from_bytes(bytes, addr->bsize);
+	addr2 = multiaddress_new_from_bytes((unsigned char*)bytes, addr->bsize);
 
 	free(bytes);
 	bytes = NULL;
 
 	// 2. Display the resultant bytes
-	result = Var_To_Hex(addr2->bytes, addr2->bsize);
+	result = Var_To_Hex((char*)addr2->bytes, addr2->bsize);
 	fprintf(stderr, "New      Bytes: %s\n", result);
 	free(result);
 	result = NULL;

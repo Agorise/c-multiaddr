@@ -53,7 +53,7 @@ struct MultiAddress* multiaddress_new_from_bytes(const uint8_t* byteaddress, int
 			}
 			out->bsize = size;
 			memcpy(out->bytes, byteaddress, size);
-			if(!bytes_to_string(&out->string,byteaddress,size)==1)
+			if(!bytes_to_string(&out->string,byteaddress,size))
 			{
 				multiaddress_free(out);
 				return NULL;
