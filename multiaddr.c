@@ -347,3 +347,20 @@ int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 	}
 }
 
+int multiaddress_compare(const struct MultiAddress* a, const struct MultiAddress* b) {
+	if (a == NULL && b == NULL)
+		return 0;
+	if (a == NULL && b != NULL)
+		return -1;
+	if (a != NULL && b == NULL)
+		return 1;
+	int total = b->bsize - a->bsize;
+	if (total != 0)
+		return total;
+	for(size_t i = 0; i < b->bsize; i++) {
+		total = b->bytes[i] - a->bytes[i];
+		if (total != 0)
+			return total;
+	}
+	return 0;
+}

@@ -87,4 +87,6 @@ int multiaddress_get_ip_port(const struct MultiAddress* in);
  */
 char* multiaddress_get_peer_id(const struct MultiAddress* in);
 
+int multiaddress_compare(const struct MultiAddress* a, const struct MultiAddress* b);
+
 #endif
