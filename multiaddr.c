@@ -347,6 +347,12 @@ int multiaddress_decapsulate(struct MultiAddress * result, char * srci)
 	}
 }
 
+/**
+ * Check to see how these two addresses compare
+ * @param a side A
+ * @param b side B
+ * @returns <0 if B > A; >0 if A > B; 0 if A == B
+ */
 int multiaddress_compare(const struct MultiAddress* a, const struct MultiAddress* b) {
 	if (a == NULL && b == NULL)
 		return 0;
@@ -364,3 +370,28 @@ int multiaddress_compare(const struct MultiAddress* a, const struct MultiAddress
 	}
 	return 0;
 }
+
+/**
+ * Check to see how these two addresses compare, ignoring IP address,
+ * only looking at the first /ipfs/ID hash
+ * @param a side A
+ * @param b side B
+ * @returns <0 if B > A; >0 if A > B; 0 if A == B
+ */
+int multiaddress_compare_id(const struct MultiAddress* a, const struct MultiAddress* b) {
+	char* a_id = multiaddress_get_peer_id(a);
+	char* b_id = multiaddress_get_peer_id(b);
+	if (a_id == NULL && b_id == NULL)
+		return 0;
+	if (a_id == NULL && b_id != NULL)
+		return -1;
+	if (a_id != NULL && b_id == NULL)
+		return 1;
+	int retVal = strcmp(a_id, b_id);
+	if (a_id != NULL)
+		free(a_id);
+	if (b_id != NULL)
+		free(b_id);
+	return retVal;
+}
+

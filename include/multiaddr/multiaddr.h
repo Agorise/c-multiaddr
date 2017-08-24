@@ -87,6 +87,20 @@ int multiaddress_get_ip_port(const struct MultiAddress* in);
  */
 char* multiaddress_get_peer_id(const struct MultiAddress* in);
 
+/**
+ * Check to see how these two addresses compare
+ * @param a side A
+ * @param b side B
+ * @returns <0 if B > A; >0 if A > B; 0 if A == B
+ */
 int multiaddress_compare(const struct MultiAddress* a, const struct MultiAddress* b);
+
+/**
+ * Check to see how these two addresses compare, ignoring IP address, only looking at ID hash
+ * @param a side A
+ * @param b side B
+ * @returns <0 if B > A; >0 if A > B; 0 if A == B
+ */
+int multiaddress_compare_id(const struct MultiAddress* a, const struct MultiAddress* b);
 
 #endif
