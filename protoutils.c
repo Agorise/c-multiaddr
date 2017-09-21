@@ -638,7 +638,7 @@ int string_to_bytes(uint8_t** finalbytes, size_t* realbbsize, const char* strx, 
 {
 	if(strx[0] != '/')
 	{
-		printf("Error, must start with '/'\n");
+		fprintf(stderr, "multiaddr:string_to_bytes: Error, must start with '/' : [%s].\n", strx);
 		return 0;
 	}
 
